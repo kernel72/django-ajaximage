@@ -58,11 +58,19 @@
     var update = function(el, data) {
         var link = el.querySelector('.file-link'),
             path = el.querySelector('.file-path'),
-            img  = el.querySelector('.file-img')
+            img  = el.querySelector('.file-img'),
+            file = el.querySelector('.file-lnk')
 
         link.setAttribute('href', data.url)
         path.value = data.filename
-        img.src = data.url
+
+        if (img && img.src){
+            img.src = data.url
+        }
+
+        if (file){
+            file.innerHTML = data.url
+        }
 
         el.className = 'ajaximage img-active'
         el.querySelector('.bar').style.width = '0%'
@@ -88,12 +96,7 @@
             file    = el.querySelector('.file-input').files[0],
             dest    = el.querySelector('.file-dest').value,
             form    = new FormData(),
-            headers = {'X-CSRFToken': getCookie('csrftoken')},
-            regex  = /jpg|jpeg|png|gif/i
-
-        if( ! regex.test(file.type)){
-            return alert('Incorrect image format. Allowed (jpg, gif, png).')
-        }
+            headers = {'X-CSRFToken': getCookie('csrftoken')};
 
         el.className = 'ajaximage progress-active'
         disableSubmit(true)

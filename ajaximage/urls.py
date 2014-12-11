@@ -10,4 +10,9 @@ urlpatterns = patterns(
         'ajaximage.views.ajaximage',
         name='ajaximage'
     ),
+    url(
+        '^upload/(?P<upload_to>.*)',
+        'ajaximage.views.ajaxfile',
+        name='ajaxfile'
+    )
 )

@@ -3,7 +3,7 @@ from django.core.files.storage import default_storage
 from django.db.models.fields.files import FileDescriptor, FieldFile
 from django.db.models import Field
 from django.conf import settings
-from .widgets import AjaxImageWidget
+from .widgets import AjaxImageWidget, AjaxFileWidget
 
 
 class AjaxImageField(Field):
@@ -48,6 +48,40 @@ class AjaxImageField(Field):
         defaults = {'widget': self.widget}
         defaults.update(kwargs)
         return super(AjaxImageField, self).formfield(**defaults)
+
+
+class AjaxFileField(Field):
+
+    storage = default_storage
+    attr_class = FieldFile
+    descriptor_class = FileDescriptor
+
+    def __init__(self, *args, **kwargs):
+        upload_to = kwargs.pop('upload_to', '')
+
+        self.widget = AjaxFileWidget(
+            upload_to=upload_to
+        )
+        super(AjaxFileField, self).__init__(*args, **kwargs)
+
+    def contribute_to_class(self, cls, name, virtual_only=False):
+        super(AjaxFileField, self).contribute_to_class(cls, name)
+        setattr(cls, self.name, self.descriptor_class(self))
+
+    def get_prep_value(self, value):
+        """Returns field's value prepared for saving into a database."""
+        # Need to convert File objects provided via a form to unicode for database insertion
+        if value is None:
+            return None
+        return str(value)
+
+    def get_internal_type(self):
+        return "FileField"
+
+    def formfield(self, **kwargs):
+        defaults = {'widget': self.widget}
+        defaults.update(kwargs)
+        return super(AjaxFileField, self).formfield(**defaults)
 
 
 if 'south' in settings.INSTALLED_APPS:
